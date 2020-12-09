@@ -1,12 +1,14 @@
+const section = document.querySelector("section");
 const newArray = document.querySelector("#new");
 const bubbleSortButton = document.querySelector("#bubbleSort");
-const section = document.querySelector("section");
+const mergeSortButton = document.querySelector("#mergeSort");
 
 let array = [];
 let barsPresent = false;
 
 newArray.onclick = makeBars;
 bubbleSortButton.onclick = bubbleSort;
+mergeSortButton.onclick = mergeSort;
 
 function makeBars() {
     section.innerHTML = "";
@@ -40,14 +42,13 @@ function bubbleSort() {
                 setTimeout(() => {
                     barOneStyle.backgroundColor = color;
                     barTwoStyle.backgroundColor = color;
-                }, i * 0.1);
+                }, i * 0.7);
             } else {
                 const [barIdx, newHeight] = animations[i];
-                console.log(arrayBars[barIdx]);
                 const barStyle = arrayBars[barIdx].style;
                 setTimeout(() => {
                     barStyle.height = `${3 * newHeight}px`;
-                }, i * 0.1);
+                }, i * 0.7);
             }
         }
     }, 0.3);
@@ -75,6 +76,71 @@ const bubbleSortHelper = () => {
 }
 
 
+function mergeSort() {
+    if (!barsPresent)
+        makeBars();
+    barsPresent = false;
+    const auxiliary = array.slice();
+    const animations = [];
+    mergeSortHelper(array, 0, array.length - 1, auxiliary, animations);
+    const arrayBars = document.querySelectorAll(".arrayBars");
+    setTimeout(() => {
+        for (let i = 0; i < animations.length; i++) {
+            const isColorChange = i % 3 !== 2;
+            if (isColorChange) {
+                const [barOneIdx, barTwoIdx] = animations[i];
+                const barOneStyle = arrayBars[barOneIdx].style;
+                const barTwoStyle = arrayBars[barTwoIdx].style;
+                const color = i % 3 === 0 ? "red" : "teal";
+                setTimeout(() => {
+                    barOneStyle.backgroundColor = color;
+                    barTwoStyle.backgroundColor = color;
+                }, i * 2);
+            } else {
+                const [barIdx, newHeight] = animations[i];
+                const barStyle = arrayBars[barIdx].style;
+                setTimeout(() => {
+                    barStyle.height = `${3 * newHeight}px`;
+                }, i * 2);
+            }
+        }
+    }, 0.3);
+}
+
+function mergeSortHelper(mainArray, si, ei, auxiliaryArray, animations) {
+    if (si === ei) return;
+    let midIdx = Math.floor((si + ei) / 2);
+    mergeSortHelper(auxiliaryArray, si, midIdx, mainArray, animations);
+    mergeSortHelper(auxiliaryArray, midIdx + 1, ei, mainArray, animations);
+    doMerge(mainArray, si, midIdx, ei, auxiliaryArray, animations);
+}
+
+function doMerge(mainArray, si, midIdx, ei, auxiliaryArray, animations) {
+    let k = si, i = si, j = midIdx + 1;
+    while (i <= midIdx && j <= ei) {
+        animations.push([i, j]);
+        animations.push([i, j]);
+        if (auxiliaryArray[i] <= auxiliaryArray[j]) {
+            animations.push([k, auxiliaryArray[i]]);
+            mainArray[k++] = auxiliaryArray[i++];
+        } else {
+            animations.push([k, auxiliaryArray[j]]);
+            mainArray[k++] = auxiliaryArray[j++];
+        }
+    }
+    while (i <= midIdx) {
+        animations.push([i, i]);
+        animations.push([i, i]);
+        animations.push([k, auxiliaryArray[i]]);
+        mainArray[k++] = auxiliaryArray[i++];
+    }
+    while (j <= ei) {
+        animations.push([j, j]);
+        animations.push([j, j]);
+        animations.push([k, auxiliaryArray[j]]);
+        mainArray[k++] = auxiliaryArray[j++];
+    }
+}
 
 function generateRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1) + min);
